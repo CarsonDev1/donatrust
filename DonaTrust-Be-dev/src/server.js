@@ -251,10 +251,20 @@ app.use(errorMiddleware);
 // Database connection and server start
 sequelize
 	.authenticate()
-	.then(() => {
+	.then(async () => {
 		logger.info('Kết nối cơ sở dữ liệu thành công');
 		// Sync database - chỉ tạo tables nếu chưa tồn tại
-		return sequelize.sync({ force: false, alter: false });
+		await sequelize.sync({ force: false, alter: false });
+
+		// Update schema with new fields (development mode)
+		if (process.env.NODE_ENV === 'development') {
+			try {
+				const { updateDatabaseSchema } = require('./utils/updateSchema');
+				await updateDatabaseSchema();
+			} catch (error) {
+				logger.warn('Schema update failed (this may be normal if already updated):', error.message);
+			}
+		}
 	})
 	.then(async () => {
 		const PORT = process.env.PORT || 3000;

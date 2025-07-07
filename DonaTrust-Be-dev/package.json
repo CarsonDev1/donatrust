@@ -6,7 +6,8 @@
 	"scripts": {
 		"start": "nodemon src/server.js",
 		"dev": "nodemon src/server.js",
-		"prod": "node src/server.js"
+		"prod": "node src/server.js",
+		"migrate": "node scripts/migrate.js"
 	},
 	"keywords": [],
 	"author": "",
