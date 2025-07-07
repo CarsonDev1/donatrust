@@ -75,6 +75,18 @@ const Campaign = sequelize.define(
 		rejection_reason: {
 			type: DataTypes.TEXT,
 		},
+		approved_at: {
+			type: DataTypes.DATE,
+		},
+		approved_by: {
+			type: DataTypes.STRING,
+		},
+		rejected_at: {
+			type: DataTypes.DATE,
+		},
+		rejected_by: {
+			type: DataTypes.STRING,
+		},
 		image_url: {
 			type: DataTypes.STRING,
 		},

@@ -7,6 +7,7 @@ const UserSocialLink = require('./UserSocialLink');
 const Vote = require('./Vote');
 const Feedback = require('./Feedback');
 const Notification = require('./Notification');
+const News = require('./News');
 
 // User associations
 User.hasOne(Charity, { foreignKey: 'user_id', as: 'charity' });
@@ -15,6 +16,7 @@ User.hasMany(Vote, { foreignKey: 'user_id', as: 'votes' });
 User.hasMany(Feedback, { foreignKey: 'user_id', as: 'feedbacks' });
 User.hasMany(Notification, { foreignKey: 'user_id', as: 'notifications' });
 User.hasOne(UserSocialLink, { foreignKey: 'user_id', as: 'social_links' });
+User.hasMany(News, { foreignKey: 'author_id', as: 'news' });
 
 // Charity associations
 Charity.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
@@ -50,6 +52,9 @@ Feedback.belongsTo(Campaign, { foreignKey: 'campaign_id', as: 'campaign' });
 // Notification associations
 Notification.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
 
+// News associations
+News.belongsTo(User, { foreignKey: 'author_id', as: 'author' });
+
 module.exports = {
 	User,
 	Charity,
@@ -60,4 +65,5 @@ module.exports = {
 	Vote,
 	Feedback,
 	Notification,
+	News,
 };

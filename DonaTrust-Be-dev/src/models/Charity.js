@@ -105,6 +105,15 @@ const Charity = sequelize.define(
 			type: DataTypes.JSON,
 			defaultValue: [],
 		},
+		verified_at: {
+			type: DataTypes.DATE,
+		},
+		verified_by: {
+			type: DataTypes.STRING,
+		},
+		rejection_reason: {
+			type: DataTypes.TEXT,
+		},
 		total_received: {
 			type: DataTypes.DECIMAL(15, 2),
 			defaultValue: 0,

@@ -88,6 +88,18 @@ const User = sequelize.define(
 			defaultValue: DataTypes.NOW,
 		},
 		phone_verified_at: DataTypes.DATE,
+		// DAO approval tracking
+		dao_approved_at: DataTypes.DATE,
+		dao_approved_by: DataTypes.STRING,
+		dao_rejection_reason: DataTypes.TEXT,
+		dao_rejected_at: DataTypes.DATE,
+		dao_rejected_by: DataTypes.STRING,
+		// User banning tracking
+		ban_reason: DataTypes.TEXT,
+		banned_at: DataTypes.DATE,
+		banned_by: DataTypes.STRING,
+		unbanned_at: DataTypes.DATE,
+		unbanned_by: DataTypes.STRING,
 	},
 	{
 		tableName: 'Users',
