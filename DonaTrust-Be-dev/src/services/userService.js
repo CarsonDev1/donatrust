@@ -114,15 +114,10 @@ exports.uploadAvatar = async (userId, file) => {
 		throw new AppError('Không có file được upload', 400);
 	}
 
-	// Kiểm tra loại file
-	const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+	// Kiểm tra loại file (multer đã filter rồi nhưng double check)
+	const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
 	if (!allowedTypes.includes(file.mimetype)) {
-		throw new AppError('Chỉ cho phép upload file ảnh (JPEG, PNG, GIF)', 400);
-	}
-
-	// Kiểm tra kích thước file (5MB)
-	if (file.size > 5 * 1024 * 1024) {
-		throw new AppError('Kích thước file không được vượt quá 5MB', 400);
+		throw new AppError('Chỉ cho phép upload file ảnh (JPEG, PNG, GIF, WebP)', 400);
 	}
 
 	const user = await User.findByPk(userId);
@@ -130,16 +125,16 @@ exports.uploadAvatar = async (userId, file) => {
 		throw new AppError('Không tìm thấy người dùng', 404);
 	}
 
-	// TODO: Upload to cloud storage (AWS S3, Cloudinary, etc.)
-	// Hiện tại chỉ lưu đường dẫn local
-	const avatarUrl = `/uploads/avatars/${userId}_${Date.now()}_${file.originalname}`;
+	// Sử dụng filename mà multer đã tạo
+	const avatarUrl = `/uploads/avatars/${file.filename}`;
 
 	await user.update({ profile_image: avatarUrl });
 
-	logger.info(`Avatar uploaded successfully: ${user.email}`);
+	logger.info(`Avatar uploaded successfully: ${user.email}, file: ${file.filename}`);
 	return {
 		message: 'Upload ảnh đại diện thành công',
 		avatar_url: avatarUrl,
+		user: { ...user.toJSON(), password: undefined },
 	};
 };
 

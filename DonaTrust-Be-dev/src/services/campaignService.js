@@ -391,3 +391,85 @@ exports.getCampaignById = async (campaignId) => {
 
 	return campaign;
 };
+
+/**
+ * Upload ảnh đơn cho campaign
+ */
+exports.uploadImage = async (campaignId, file, userId) => {
+	if (!file) {
+		throw new AppError('Không có file được upload', 400);
+	}
+
+	// Tìm campaign và kiểm tra quyền
+	const charity = await Charity.findOne({ where: { user_id: userId } });
+	if (!charity) {
+		throw new AppError('Bạn chưa đăng ký tổ chức từ thiện', 404);
+	}
+
+	const campaign = await Campaign.findOne({
+		where: {
+			campaign_id: campaignId,
+			charity_id: charity.charity_id,
+		},
+	});
+
+	if (!campaign) {
+		throw new AppError('Không tìm thấy chiến dịch hoặc bạn không có quyền', 404);
+	}
+
+	// Tạo URL cho ảnh
+	const imageUrl = `/uploads/campaigns/${file.filename}`;
+
+	// Cập nhật image_url chính của campaign
+	await campaign.update({ image_url: imageUrl });
+
+	logger.info(`Campaign image uploaded: ${campaign.title}, file: ${file.filename}`);
+	return {
+		message: 'Upload ảnh chiến dịch thành công',
+		image_url: imageUrl,
+		campaign: campaign,
+	};
+};
+
+/**
+ * Upload nhiều ảnh cho campaign
+ */
+exports.uploadImages = async (campaignId, files, userId) => {
+	if (!files || files.length === 0) {
+		throw new AppError('Không có file được upload', 400);
+	}
+
+	// Tìm campaign và kiểm tra quyền
+	const charity = await Charity.findOne({ where: { user_id: userId } });
+	if (!charity) {
+		throw new AppError('Bạn chưa đăng ký tổ chức từ thiện', 404);
+	}
+
+	const campaign = await Campaign.findOne({
+		where: {
+			campaign_id: campaignId,
+			charity_id: charity.charity_id,
+		},
+	});
+
+	if (!campaign) {
+		throw new AppError('Không tìm thấy chiến dịch hoặc bạn không có quyền', 404);
+	}
+
+	// Tạo URLs cho các ảnh
+	const uploadedImages = files.map((file) => `/uploads/campaigns/${file.filename}`);
+
+	// Lấy gallery hiện tại và thêm ảnh mới
+	const currentGallery = campaign.gallery || [];
+	const updatedGallery = [...currentGallery, ...uploadedImages];
+
+	// Cập nhật gallery của campaign
+	await campaign.update({ gallery: updatedGallery });
+
+	logger.info(`Campaign images uploaded: ${campaign.title}, files: ${files.map((f) => f.filename).join(', ')}`);
+	return {
+		message: `Upload ${files.length} ảnh chiến dịch thành công`,
+		uploaded_images: uploadedImages,
+		campaign: campaign,
+	};
+};

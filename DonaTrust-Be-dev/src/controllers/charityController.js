@@ -978,3 +978,62 @@ exports.getCharityById = async (req, res, next) => {
 		next(error);
 	}
 };
+
+// ============== DOCUMENT UPLOAD ==============
+
+/**
+ * @swagger
+ * /api/charities/upload-document:
+ *   post:
+ *     summary: Upload tài liệu cho tổ chức từ thiện
+ *     tags: [Charity Management]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               document:
+ *                 type: string
+ *                 format: binary
+ *                 description: File tài liệu (PDF, DOC, DOCX, hoặc ảnh, tối đa 20MB)
+ *               document_type:
+ *                 type: string
+ *                 enum: [license, certificate, financial_report, other]
+ *                 description: Loại tài liệu
+ *               description:
+ *                 type: string
+ *                 description: Mô tả tài liệu
+ *     responses:
+ *       200:
+ *         description: Upload tài liệu thành công
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 document_url:
+ *                   type: string
+ *                 charity:
+ *                   type: object
+ *       400:
+ *         description: Dữ liệu không hợp lệ
+ *       404:
+ *         description: Không tìm thấy tổ chức từ thiện
+ */
+exports.uploadDocument = [
+	requireCharityOwnership,
+	async (req, res, next) => {
+		try {
+			const result = await charityService.uploadDocument(req.user.user_id, req.file, req.body);
+			res.json(result);
+		} catch (error) {
+			next(error);
+		}
+	},
+];

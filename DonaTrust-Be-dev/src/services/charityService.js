@@ -235,3 +235,105 @@ exports.deleteCharity = async (charityId, userId, userRole) => {
 
 	await charity.destroy();
 };
+
+/**
+ * Upload tài liệu cho charity
+ */
+exports.uploadDocument = async (userId, file, documentData) => {
+	if (!file) {
+		throw new AppError('Không có file được upload', 400);
+	}
+
+	// Tìm charity của user
+	const charity = await Charity.findOne({ where: { user_id: userId } });
+	if (!charity) {
+		throw new AppError('Bạn chưa đăng ký tổ chức từ thiện', 404);
+	}
+
+	// Tạo URL cho document
+	const documentUrl = `/uploads/documents/${file.filename}`;
+
+	// Lấy documents hiện tại và thêm document mới
+	const currentDocuments = charity.verification_documents || [];
+	const newDocument = {
+		id: Date.now().toString(),
+		filename: file.filename,
+		url: documentUrl,
+		type: documentData.document_type || 'other',
+		description: documentData.description || '',
+		uploaded_at: new Date().toISOString(),
+		size: file.size,
+		mimetype: file.mimetype,
+	};
+
+	const updatedDocuments = [...currentDocuments, newDocument];
+
+	// Cập nhật charity với document mới
+	await charity.update({
+		verification_documents: updatedDocuments,
+		// Nếu là license document, cập nhật license_document field
+		...(documentData.document_type === 'license' && { license_document: documentUrl }),
+	});
+
+	logger.info(`Document uploaded for charity: ${charity.name}, file: ${file.filename}`);
+	return {
+		message: 'Upload tài liệu thành công',
+		document_url: documentUrl,
+		document_info: newDocument,
+		charity: charity,
+	};
+};
+
+/**
+ * Lấy thống kê charity
+ */
+exports.getCharityStats = async (userId) => {
+	const charity = await Charity.findOne({ where: { user_id: userId } });
+	if (!charity) {
+		throw new AppError('Bạn chưa đăng ký tổ chức từ thiện', 404);
+	}
+
+	// Thống kê campaigns
+	const campaignStats = await Campaign.findAll({
+		where: { charity_id: charity.charity_id },
+		attributes: [
+			[require('sequelize').fn('COUNT', require('sequelize').col('campaign_id')), 'total_campaigns'],
+			[require('sequelize').fn('SUM', require('sequelize').col('current_amount')), 'total_raised'],
+			[require('sequelize').fn('AVG', require('sequelize').col('current_amount')), 'avg_raised_per_campaign'],
+		],
+		raw: true,
+	});
+
+	// Thống kê theo status
+	const statusStats = await Campaign.findAll({
+		where: { charity_id: charity.charity_id },
+		attributes: ['status', [require('sequelize').fn('COUNT', require('sequelize').col('campaign_id')), 'count']],
+		group: ['status'],
+		raw: true,
+	});
+
+	// Financial reports
+	const reportStats = await FinancialReport.findAll({
+		where: { charity_id: charity.charity_id },
+		attributes: [[require('sequelize').fn('COUNT', require('sequelize').col('report_id')), 'total_reports']],
+		raw: true,
+	});
+
+	return {
+		charity_info: {
+			name: charity.name,
+			verification_status: charity.verification_status,
+			rating: charity.rating,
+			active_campaigns: charity.active_campaigns,
+		},
+		campaign_stats: {
+			total_campaigns: parseInt(campaignStats[0]?.total_campaigns) || 0,
+			total_raised: parseFloat(campaignStats[0]?.total_raised) || 0,
+			avg_raised_per_campaign: parseFloat(campaignStats[0]?.avg_raised_per_campaign) || 0,
+			by_status: statusStats,
+		},
+		financial_stats: {
+			total_reports: parseInt(reportStats[0]?.total_reports) || 0,
+		},
+	};
+};

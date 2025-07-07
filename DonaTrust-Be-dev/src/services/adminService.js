@@ -1,5 +1,5 @@
 const { Op } = require('sequelize');
-const { User, Charity, Campaign, News, Vote } = require('../models/associations');
+const { User, Charity, Campaign, News, Vote, Donation } = require('../models/associations');
 const { AppError } = require('../utils/errorHandler');
 const { ROLES, CAMPAIGN_APPROVAL_STATUS, CHARITY_VERIFICATION_STATUS, USER_STATUS } = require('../config/constants');
 
@@ -510,15 +510,16 @@ class AdminService {
 			pendingCampaigns,
 			totalDonations,
 			totalNews,
+			totalDonationAmount,
 		] = await Promise.all([
 			User.count(),
 			Charity.count(),
 			Campaign.count(),
 			Charity.count({ where: { verification_status: CHARITY_VERIFICATION_STATUS.PENDING } }),
 			Campaign.count({ where: { approval_status: CAMPAIGN_APPROVAL_STATUS.PENDING } }),
-			// Note: This would need Donation model import if available
-			0, // Placeholder for donations count
+			Donation.count(),
 			News.count(),
+			Donation.sum('amount'),
 		]);
 
 		return {
@@ -529,6 +530,7 @@ class AdminService {
 			pendingCampaigns,
 			totalDonations,
 			totalNews,
+			totalDonationAmount: totalDonationAmount || 0,
 			pendingApprovals: pendingCharities + pendingCampaigns,
 		};
 	}

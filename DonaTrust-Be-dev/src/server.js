@@ -10,6 +10,25 @@ const dotenv = require('dotenv');
 // Import models và associations
 require('./models/associations');
 
+// Create upload directories
+const fs = require('fs');
+const createUploadDirs = () => {
+	const uploadDirs = [
+		path.join(__dirname, '../uploads'),
+		path.join(__dirname, '../uploads/avatars'),
+		path.join(__dirname, '../uploads/campaigns'),
+		path.join(__dirname, '../uploads/documents'),
+		path.join(__dirname, '../uploads/reports'),
+	];
+
+	uploadDirs.forEach((dir) => {
+		if (!fs.existsSync(dir)) {
+			fs.mkdirSync(dir, { recursive: true });
+			logger.info(`Created upload directory: ${dir}`);
+		}
+	});
+};
+
 // Swagger setup
 const swaggerJsdoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
@@ -253,6 +272,10 @@ sequelize
 	.authenticate()
 	.then(async () => {
 		logger.info('Kết nối cơ sở dữ liệu thành công');
+
+		// Create upload directories
+		createUploadDirs();
+
 		// Sync database - chỉ tạo tables nếu chưa tồn tại
 		await sequelize.sync({ force: false, alter: false });
 

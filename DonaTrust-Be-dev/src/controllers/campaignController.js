@@ -265,3 +265,111 @@ exports.delete = async (req, res, next) => {
 		next(error);
 	}
 };
+
+/**
+ * @swagger
+ * /api/campaigns/{id}/upload-image:
+ *   post:
+ *     summary: Upload ảnh đơn cho chiến dịch
+ *     tags: [Campaigns]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID chiến dịch
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               image:
+ *                 type: string
+ *                 format: binary
+ *                 description: File ảnh (JPEG, PNG, GIF, WebP, tối đa 10MB)
+ *     responses:
+ *       200:
+ *         description: Upload ảnh thành công
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 image_url:
+ *                   type: string
+ *                 campaign:
+ *                   type: object
+ *       400:
+ *         description: Dữ liệu không hợp lệ
+ *       404:
+ *         description: Không tìm thấy chiến dịch
+ */
+exports.uploadImage = async (req, res, next) => {
+	try {
+		const result = await campaignService.uploadImage(req.params.id, req.file, req.user.user_id);
+		res.json(result);
+	} catch (error) {
+		next(error);
+	}
+};
+
+/**
+ * @swagger
+ * /api/campaigns/{id}/upload-images:
+ *   post:
+ *     summary: Upload nhiều ảnh cho chiến dịch
+ *     tags: [Campaigns]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID chiến dịch
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               images:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                   format: binary
+ *                 description: Tối đa 5 file ảnh (JPEG, PNG, GIF, WebP, mỗi file tối đa 10MB)
+ *     responses:
+ *       200:
+ *         description: Upload ảnh thành công
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 uploaded_images:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *                 campaign:
+ *                   type: object
+ */
+exports.uploadImages = async (req, res, next) => {
+	try {
+		const result = await campaignService.uploadImages(req.params.id, req.files, req.user.user_id);
+		res.json(result);
+	} catch (error) {
+		next(error);
+	}
+};

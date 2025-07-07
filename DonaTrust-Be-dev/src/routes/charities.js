@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const charityController = require('../controllers/charityController');
 const authMiddleware = require('../middleware/authMiddleware');
+const { uploadDocument } = require('../middleware/uploadMiddleware');
 
 /**
  * @swagger
@@ -22,6 +23,9 @@ router.post('/register', charityController.registerCharity);
 router.get('/my-charity', charityController.getMyCharity);
 router.put('/my-charity', charityController.updateMyCharity);
 router.get('/stats', charityController.getCharityStats);
+
+// Document upload
+router.post('/upload-document', uploadDocument, charityController.uploadDocument);
 
 // Campaign management
 router.post('/campaigns', charityController.createCampaign);
