@@ -24,16 +24,31 @@ class AuthService {
   // Login user
   async login(credentials) {
     try {
+      console.log('📤 Login attempt:', { email: credentials.email });
+      
       const response = await api.post('/auth/login', credentials);
-      const { accessToken, refreshToken, user } = response.data;
+      console.log('📥 Login response:', response.data);
+      
+      // Backend returns { token, user }
+      const { token, user } = response.data;
 
-      // Store tokens and user info
-      localStorage.setItem('accessToken', accessToken);
-      localStorage.setItem('refreshToken', refreshToken);
+      // Store token and user info
+      localStorage.setItem('accessToken', token);
       localStorage.setItem('user', JSON.stringify(user));
+      
+      console.log('✅ Tokens stored:', {
+        accessToken: token ? 'Present' : 'Missing',
+        user: user ? 'Present' : 'Missing'
+      });
 
-      return response.data;
+      return { 
+        token, 
+        user,
+        // For backward compatibility with components expecting these names
+        accessToken: token 
+      };
     } catch (error) {
+      console.error('❌ Login failed:', error);
       throw this.handleError(error);
     }
   }
@@ -42,14 +57,14 @@ class AuthService {
   async googleLogin(googleToken) {
     try {
       const response = await api.post('/auth/google', { token: googleToken });
-      const { accessToken, refreshToken, user } = response.data;
+      // Backend returns { token, user } format
+      const { token, user } = response.data;
 
-      // Store tokens and user info
-      localStorage.setItem('accessToken', accessToken);
-      localStorage.setItem('refreshToken', refreshToken);
+      // Store token and user info
+      localStorage.setItem('accessToken', token);
       localStorage.setItem('user', JSON.stringify(user));
 
-      return response.data;
+      return { token, user, accessToken: token };
     } catch (error) {
       throw this.handleError(error);
     }
@@ -125,6 +140,7 @@ class AuthService {
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');
       localStorage.removeItem('user');
+      console.log('🔄 Local storage cleared');
     }
   }
 
@@ -137,10 +153,10 @@ class AuthService {
       }
 
       const response = await api.post('/auth/refresh-token', { refreshToken });
-      const { accessToken } = response.data;
+      const { token } = response.data; // Match backend response format
 
-      localStorage.setItem('accessToken', accessToken);
-      return response.data;
+      localStorage.setItem('accessToken', token);
+      return { token, accessToken: token };
     } catch (error) {
       // If refresh fails, logout user
       this.logout();
@@ -156,7 +172,13 @@ class AuthService {
 
   // Check if user is authenticated
   isAuthenticated() {
-    return !!localStorage.getItem('accessToken');
+    const token = localStorage.getItem('accessToken');
+    const isAuth = !!token;
+    console.log('🔍 Authentication check:', { 
+      hasToken: isAuth,
+      token: token ? `${token.substring(0, 20)}...` : 'null'
+    });
+    return isAuth;
   }
 
   // Get access token

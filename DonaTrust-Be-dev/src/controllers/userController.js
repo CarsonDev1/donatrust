@@ -84,11 +84,69 @@ exports.getProfile = async (req, res, next) => {
  *         description: Dữ liệu không hợp lệ
  */
 exports.updateProfile = [
-	check('full_name').optional().isLength({ min: 2, max: 100 }).withMessage('Họ tên phải từ 2-100 ký tự'),
-	check('phone').optional().isMobilePhone('vi-VN').withMessage('Số điện thoại không hợp lệ'),
-	check('date_of_birth').optional().isISO8601().withMessage('Ngày sinh không hợp lệ'),
-	check('gender').optional().isIn(['male', 'female', 'other']).withMessage('Giới tính không hợp lệ'),
-	check('profile_image').optional().isURL().withMessage('URL ảnh đại diện không hợp lệ'),
+	check('full_name')
+		.optional()
+		.trim()
+		.isLength({ min: 2, max: 100 })
+		.withMessage('Họ tên phải từ 2-100 ký tự')
+		.matches(/^[a-zA-ZÀ-ỹ\s]*$/)
+		.withMessage('Họ tên chỉ được chứa chữ cái và khoảng trắng'),
+
+	check('phone')
+		.optional()
+		.trim()
+		.isMobilePhone('vi-VN')
+		.withMessage('Số điện thoại không hợp lệ'),
+
+	check('district')
+		.optional()
+		.trim()
+		.isLength({ min: 2, max: 100 })
+		.withMessage('Quận/Huyện phải từ 2-100 ký tự'),
+
+	check('ward')
+		.optional()
+		.trim()
+		.isLength({ min: 2, max: 100 })
+		.withMessage('Phường/Xã phải từ 2-100 ký tự'),
+
+	check('address')
+		.optional()
+		.trim()
+		.isLength({ min: 5, max: 200 })
+		.withMessage('Địa chỉ phải từ 5-200 ký tự'),
+
+	check('date_of_birth')
+		.optional()
+		.isISO8601()
+		.withMessage('Ngày sinh không hợp lệ')
+		.custom((value) => {
+			const date = new Date(value);
+			const now = new Date();
+			if (date > now) {
+				throw new Error('Ngày sinh không thể là ngày trong tương lai');
+			}
+			return true;
+		}),
+
+	check('gender')
+		.optional()
+		.trim()
+		.isIn(['male', 'female', 'other'])
+		.withMessage('Giới tính không hợp lệ'),
+
+	check('bio')
+		.optional()
+		.trim()
+		.isLength({ max: 255 })
+		.withMessage('Mô tả không được vượt quá 255 ký tự'),
+
+	check('profile_image')
+		.optional()
+		.trim()
+		.isURL()
+		.withMessage('URL ảnh đại diện không hợp lệ'),
+
 	validate,
 	async (req, res, next) => {
 		try {

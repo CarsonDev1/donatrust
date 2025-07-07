@@ -24,14 +24,15 @@ const CampaignListPage = () => {
         const searchQuery = searchParams.get('search');
         const filters = {
           search: searchQuery || undefined,
-          status: activeFilter === 'ended' ? 'ended' : 'active',
+          status: activeFilter === 'completed' ? 'completed' : 'active',
           limit: 50, // Get more campaigns for pagination
         };
 
         const response = await campaignService.getAllCampaigns(filters);
+        console.log('Campaign response:', response);
 
-        setCampaigns(response.data || []);
-        setTotalCampaigns(response.total || response.data?.length || 0);
+        setCampaigns(response.campaigns || []);
+        setTotalCampaigns(response.total || 0);
         setVisibleCampaigns(8); // Reset visible campaigns when filters change
       } catch (error) {
         console.error('Error fetching campaigns:', error);
@@ -59,7 +60,7 @@ const CampaignListPage = () => {
       {/* Campaign Image */}
       <div className="relative h-[160px]">
         <img
-          src={campaign.image || campaign.imageUrl || '/images/img_image_18.png'}
+          src={campaign.image_url || '/images/img_image_18.png'}
           alt={campaign.title}
           className="w-full h-full object-cover rounded-t"
           onError={(e) => {
@@ -74,7 +75,7 @@ const CampaignListPage = () => {
 
       {/* Profile Image */}
       <img
-        src={campaign.profileImage || campaign.charityAvatar || '/images/img_ellipse_8_20x21.png'}
+        src={campaign.charity?.logo_url || '/images/img_ellipse_8_20x21.png'}
         alt="Organization"
         className="w-[32px] h-[32px] rounded-full absolute -top-4 left-4 border-2 border-white"
         onError={(e) => {
@@ -86,16 +87,16 @@ const CampaignListPage = () => {
       <div className="flex flex-col flex-1 px-4 py-3">
         <div>
           <p className="text-xs text-gray-500 text-center mb-1">
-            {campaign.organization || campaign.charityName || 'Unknown Organization'}
+            {campaign.charity?.name || 'Unknown Organization'}
           </p>
-          <h3 className="text-sm font-bold text-center mb-2">{campaign.title}</h3>
+          <h3 className="text-sm font-bold text-center mb-2 line-clamp-2">{campaign.title}</h3>
 
           {/* Progress Bar */}
           <div className="w-full h-2 bg-gray-200 rounded mb-1">
             <div
               className="h-full bg-pink-500 rounded"
               style={{
-                width: `${Math.min(((campaign.raisedAmount || 0) / (campaign.goalAmount || 1)) * 100, 100)}%`,
+                width: `${Math.min((parseFloat(campaign.current_amount) / parseFloat(campaign.goal_amount)) * 100, 100)}%`,
               }}
             />
           </div>
@@ -103,23 +104,22 @@ const CampaignListPage = () => {
           {/* Funding Info */}
           <div className="flex justify-between text-xs mb-1">
             <span>
-              {campaign.raised || new Intl.NumberFormat('vi-VN').format(campaign.raisedAmount || 0)}{' '}
+              {new Intl.NumberFormat('vi-VN').format(parseFloat(campaign.current_amount))}{' '}
               VND
             </span>
             <span>
-              {campaign.percentage ||
-                `${Math.round(((campaign.raisedAmount || 0) / (campaign.goalAmount || 1)) * 100)}%`}
+              {Math.round((parseFloat(campaign.current_amount) / parseFloat(campaign.goal_amount)) * 100)}%
             </span>
           </div>
           <p className="text-xs text-gray-500 mb-4">
-            Goal: {campaign.goal || new Intl.NumberFormat('vi-VN').format(campaign.goalAmount || 0)}{' '}
+            Goal: {new Intl.NumberFormat('vi-VN').format(parseFloat(campaign.goal_amount))}{' '}
             VND
           </p>
         </div>
 
         {/* Detail Button */}
         <div className="mt-auto text-center">
-          <Link to={`/campaign/${campaign.id}`}>
+          <Link to={`/campaign/${campaign.campaign_id}`}>
             <button className="bg-pink-500 hover:bg-pink-600 text-white text-xs font-semibold px-4 py-2 rounded">
               Detail
             </button>
@@ -185,9 +185,9 @@ const CampaignListPage = () => {
             The campaign is raising funds.
           </Button>
           <Button
-            variant={activeFilter === 'ended' ? 'pinkOutline' : 'white'}
+            variant={activeFilter === 'completed' ? 'pinkOutline' : 'white'}
             className="w-[274px] h-[41px] rounded-r-[10px] rounded-l-none"
-            onClick={() => handleFilterChange('ended')}
+            onClick={() => handleFilterChange('completed')}
           >
             Campaign has ended
           </Button>
@@ -219,7 +219,7 @@ const CampaignListPage = () => {
           <>
             <div className="grid grid-cols-4 gap-x-[53px] gap-y-8 justify-items-center mb-12">
               {campaigns.slice(0, visibleCampaigns).map((campaign) => (
-                <CampaignCard key={campaign.id} campaign={campaign} />
+                <CampaignCard key={campaign.campaign_id} campaign={campaign} />
               ))}
             </div>
 

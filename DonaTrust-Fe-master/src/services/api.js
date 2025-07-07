@@ -23,7 +23,10 @@ api.interceptors.request.use(
     console.log('📤 API Request:', config.method?.toUpperCase(), config.url);
     const token = localStorage.getItem('accessToken');
     if (token) {
+      console.log('🔑 Token found, adding to request');
       config.headers.Authorization = `Bearer ${token}`;
+    } else {
+      console.warn('⚠️ No token found in localStorage');
     }
     return config;
   },
@@ -44,7 +47,8 @@ api.interceptors.response.use(
       '📥 API Error:',
       error.response?.status,
       error.response?.statusText,
-      error.config?.url
+      error.config?.url,
+      error.response?.data
     );
 
     const originalRequest = error.config;
@@ -56,20 +60,29 @@ api.interceptors.response.use(
       try {
         const refreshToken = localStorage.getItem('refreshToken');
         if (refreshToken) {
+          console.log('🔄 Attempting token refresh...');
           const response = await axios.post(`${API_BASE_URL}/auth/refresh-token`, {
             refreshToken,
           });
 
           const { token } = response.data;
           localStorage.setItem('accessToken', token);
+          console.log('✅ Token refreshed successfully');
 
           // Retry original request with new token
-          originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+          originalRequest.headers.Authorization = `Bearer ${token}`;
           return api(originalRequest);
+        } else {
+          console.warn('❌ No refresh token available');
+          // Clear localStorage and redirect to login
+          localStorage.clear();
+          window.location.href = '/signin';
         }
       } catch (refreshError) {
         console.error('🔄 Token refresh failed:', refreshError);
         // If refresh fails, logout user
+        localStorage.clear();
+        window.location.href = '/signin';
       }
     }
 
