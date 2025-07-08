@@ -17,10 +17,7 @@ class AdminService {
 			whereClause.verification_status = status;
 		}
 		if (search) {
-			whereClause[Op.or] = [
-				{ organization_name: { [Op.iLike]: `%${search}%` } },
-				{ tax_id: { [Op.iLike]: `%${search}%` } },
-			];
+			whereClause[Op.or] = [{ name: { [Op.iLike]: `%${search}%` } }, { tax_code: { [Op.iLike]: `%${search}%` } }];
 		}
 
 		const { count, rows } = await Charity.findAndCountAll({
@@ -130,7 +127,7 @@ class AdminService {
 				{
 					model: Charity,
 					as: 'charity',
-					attributes: ['charity_id', 'organization_name', 'verification_status'],
+					attributes: ['charity_id', 'name', 'verification_status'],
 					include: [
 						{
 							model: User,
@@ -163,7 +160,7 @@ class AdminService {
 				{
 					model: Charity,
 					as: 'charity',
-					attributes: ['charity_id', 'organization_name'],
+					attributes: ['charity_id', 'name'],
 					include: [
 						{
 							model: User,
