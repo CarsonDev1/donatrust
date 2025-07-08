@@ -201,7 +201,7 @@ class AdminService {
 				{
 					model: Donation,
 					as: 'donations',
-					attributes: ['donation_id', 'amount', 'method', 'tx_code', 'message', 'is_anonymous', 'created_at'],
+					attributes: this.getDonationAttributes(),
 					include: [
 						{
 							model: User,
@@ -220,6 +220,19 @@ class AdminService {
 		}
 
 		return campaign;
+	}
+
+	// Helper method to get donation attributes safely
+	getDonationAttributes() {
+		const baseAttributes = ['donation_id', 'amount', 'method', 'tx_code', 'is_anonymous', 'created_at'];
+
+		// Check if message column exists in Donation model
+		const donationAttributes = Object.keys(Donation.rawAttributes);
+		if (donationAttributes.includes('message')) {
+			return [...baseAttributes, 'message'];
+		}
+
+		return baseAttributes;
 	}
 
 	async approveCampaign(campaignId, adminId) {
