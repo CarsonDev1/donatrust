@@ -201,7 +201,7 @@ class AdminService {
 				{
 					model: Donation,
 					as: 'donations',
-					attributes: ['donation_id', 'amount', 'message', 'created_at'],
+					attributes: ['donation_id', 'amount', 'method', 'tx_code', 'message', 'is_anonymous', 'created_at'],
 					include: [
 						{
 							model: User,

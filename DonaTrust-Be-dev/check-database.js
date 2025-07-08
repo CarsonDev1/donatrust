@@ -51,7 +51,7 @@ async function checkDatabase() {
 		}
 
 		// Check specific columns that were causing issues
-		console.log('\n🔧 Checking Charity Model Columns:');
+		console.log('\n🔧 Checking Model Columns:');
 		try {
 			const charityAttributes = Object.keys(Charity.rawAttributes);
 			console.log('✅ Charity columns:', charityAttributes.join(', '));
@@ -62,8 +62,18 @@ async function checkDatabase() {
 			} else {
 				console.log('❌ Charity.name column missing');
 			}
+
+			const donationAttributes = Object.keys(Donation.rawAttributes);
+			console.log('✅ Donation columns:', donationAttributes.join(', '));
+
+			// Verify the 'message' column exists
+			if (donationAttributes.includes('message')) {
+				console.log('✅ Donation.message column exists');
+			} else {
+				console.log('❌ Donation.message column missing');
+			}
 		} catch (error) {
-			console.log(`❌ Error checking Charity columns: ${error.message}`);
+			console.log(`❌ Error checking model columns: ${error.message}`);
 		}
 
 		// Test a simple query

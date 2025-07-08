@@ -99,7 +99,9 @@ async function demoCampaignDetail() {
 			console.log('=====================================');
 			campaignDetail.donations.forEach((donation, index) => {
 				console.log(`${index + 1}. ${Number(donation.amount).toLocaleString('vi-VN')} VND`);
-				console.log(`   Từ: ${donation.user?.full_name || 'Ẩn danh'}`);
+				console.log(`   Từ: ${donation.is_anonymous ? 'Ẩn danh' : donation.user?.full_name || 'Không rõ'}`);
+				console.log(`   Phương thức: ${donation.method || 'Không rõ'}`);
+				console.log(`   Mã giao dịch: ${donation.tx_code || 'Không có'}`);
 				console.log(`   Tin nhắn: ${donation.message || 'Không có tin nhắn'}`);
 				console.log(`   Ngày: ${new Date(donation.created_at).toLocaleDateString()}`);
 				console.log('');

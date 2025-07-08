@@ -62,7 +62,10 @@ Content-Type: application/json
 		{
 			"donation_id": "uuid",
 			"amount": 500000,
+			"method": "bank_transfer",
+			"tx_code": "TXN123456789",
 			"message": "Chúc chiến dịch thành công",
+			"is_anonymous": false,
 			"created_at": "2024-01-01T00:00:00.000Z",
 			"user": {
 				"full_name": "Người donate",
@@ -126,7 +129,7 @@ console.log(campaignDetail);
 
 -   10 donations mới nhất
 -   Thông tin người donate (nếu không ẩn danh)
--   Số tiền và tin nhắn
+-   Số tiền, phương thức, mã giao dịch và tin nhắn
 
 ## Error Responses
 
