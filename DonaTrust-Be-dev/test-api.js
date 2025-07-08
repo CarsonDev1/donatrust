@@ -172,6 +172,37 @@ async function runTests() {
 			Authorization: `Bearer ${authToken}`,
 		});
 		logResult('Admin Dashboard Stats', adminStats.success || adminStats.status === 403, adminStats.error);
+
+		const adminCampaigns = await testEndpoint('GET', '/admin/campaigns', null, {
+			Authorization: `Bearer ${authToken}`,
+		});
+		logResult(
+			'Admin Get All Campaigns',
+			adminCampaigns.success || adminCampaigns.status === 403,
+			adminCampaigns.error
+		);
+
+		const pendingCampaigns = await testEndpoint('GET', '/admin/campaigns/pending', null, {
+			Authorization: `Bearer ${authToken}`,
+		});
+		logResult(
+			'Admin Get Pending Campaigns',
+			pendingCampaigns.success || pendingCampaigns.status === 403,
+			pendingCampaigns.error
+		);
+
+		// Test campaign detail if we have any campaigns
+		if (pendingCampaigns.success && pendingCampaigns.data && pendingCampaigns.data.length > 0) {
+			const campaignDetail = await testEndpoint(
+				'GET',
+				`/admin/campaigns/${pendingCampaigns.data[0].campaign_id}`,
+				null,
+				{
+					Authorization: `Bearer ${authToken}`,
+				}
+			);
+			logResult('Admin Get Campaign Detail', campaignDetail.success, campaignDetail.error);
+		}
 	}
 
 	// Summary

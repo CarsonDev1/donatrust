@@ -174,6 +174,26 @@ class AdminController {
 
 	/**
 	 * @swagger
+	 * /api/admin/campaigns/{id}:
+	 *   get:
+	 *     summary: Lấy thông tin chi tiết chiến dịch (bao gồm campaign pending)
+	 *     tags: [Admin Management]
+	 *     security:
+	 *       - bearerAuth: []
+	 */
+	getCampaignById = [
+		async (req, res, next) => {
+			try {
+				const campaign = await adminService.getCampaignById(req.params.id);
+				res.json(campaign);
+			} catch (error) {
+				next(error);
+			}
+		},
+	];
+
+	/**
+	 * @swagger
 	 * /api/admin/campaigns/{id}/approve:
 	 *   put:
 	 *     summary: Phê duyệt chiến dịch

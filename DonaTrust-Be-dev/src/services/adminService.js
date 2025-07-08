@@ -174,6 +174,54 @@ class AdminService {
 		});
 	}
 
+	async getCampaignById(campaignId) {
+		const campaign = await Campaign.findByPk(campaignId, {
+			include: [
+				{
+					model: Charity,
+					as: 'charity',
+					attributes: [
+						'charity_id',
+						'name',
+						'verification_status',
+						'logo_url',
+						'phone',
+						'email',
+						'address',
+						'city',
+					],
+					include: [
+						{
+							model: User,
+							as: 'user',
+							attributes: ['user_id', 'full_name', 'email', 'phone', 'created_at'],
+						},
+					],
+				},
+				{
+					model: Donation,
+					as: 'donations',
+					attributes: ['donation_id', 'amount', 'message', 'created_at'],
+					include: [
+						{
+							model: User,
+							as: 'user',
+							attributes: ['full_name', 'email'],
+						},
+					],
+					limit: 10,
+					order: [['created_at', 'DESC']],
+				},
+			],
+		});
+
+		if (!campaign) {
+			throw new AppError('Không tìm thấy chiến dịch', 404);
+		}
+
+		return campaign;
+	}
+
 	async approveCampaign(campaignId, adminId) {
 		const campaign = await Campaign.findByPk(campaignId);
 		if (!campaign) {

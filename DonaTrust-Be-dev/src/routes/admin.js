@@ -355,6 +355,102 @@ router.get('/campaigns/pending', adminController.getPendingCampaigns);
 
 /**
  * @swagger
+ * /api/admin/campaigns/{id}:
+ *   get:
+ *     summary: Lấy thông tin chi tiết chiến dịch (bao gồm campaign pending)
+ *     tags: [Admin Management]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID của chiến dịch
+ *     responses:
+ *       200:
+ *         description: Thông tin chi tiết chiến dịch
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 campaign_id:
+ *                   type: string
+ *                 title:
+ *                   type: string
+ *                 description:
+ *                   type: string
+ *                 detailed_description:
+ *                   type: string
+ *                 goal_amount:
+ *                   type: number
+ *                 current_amount:
+ *                   type: number
+ *                 start_date:
+ *                   type: string
+ *                 end_date:
+ *                   type: string
+ *                 category:
+ *                   type: string
+ *                 status:
+ *                   type: string
+ *                 approval_status:
+ *                   type: string
+ *                 rejection_reason:
+ *                   type: string
+ *                 location:
+ *                   type: string
+ *                 beneficiaries:
+ *                   type: string
+ *                 expected_impact:
+ *                   type: string
+ *                 image_url:
+ *                   type: string
+ *                 gallery_images:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *                 documents:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *                 charity:
+ *                   type: object
+ *                   properties:
+ *                     charity_id:
+ *                       type: string
+ *                     name:
+ *                       type: string
+ *                     verification_status:
+ *                       type: string
+ *                     user:
+ *                       type: object
+ *                       properties:
+ *                         full_name:
+ *                           type: string
+ *                         email:
+ *                           type: string
+ *                         phone:
+ *                           type: string
+ *                 donations:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                 created_at:
+ *                   type: string
+ *                 updated_at:
+ *                   type: string
+ *       404:
+ *         description: Không tìm thấy chiến dịch
+ *       403:
+ *         description: Không có quyền truy cập
+ */
+router.get('/campaigns/:id', adminController.getCampaignById);
+
+/**
+ * @swagger
  * /api/admin/campaigns/{id}/approve:
  *   put:
  *     summary: Phê duyệt chiến dịch
