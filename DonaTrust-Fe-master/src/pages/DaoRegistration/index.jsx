@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Header from '../../components/common/Header';
 import Footer from '../../components/common/Footer';
 import Button from '../../components/ui/Button';
 import EditText from '../../components/ui/EditText';
@@ -78,8 +77,6 @@ const DaoRegistration = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-global-3">
-      <Header />
-
       {/* Hero Background */}
       <div
         className="w-full h-[349px] bg-cover bg-center relative"

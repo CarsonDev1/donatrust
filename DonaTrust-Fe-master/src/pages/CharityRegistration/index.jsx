@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import Header from '../../components/common/Header';
 import Footer from '../../components/common/Footer';
 import EditText from '../../components/ui/EditText';
 import CheckBox from '../../components/ui/CheckBox';
@@ -223,8 +222,6 @@ const CharityRegistration = () => {
 
   return (
     <div className="min-h-screen bg-global-3 flex flex-col">
-      <Header />
-
       {/* Hero Background Image */}
       <div
         className="relative w-full h-[349px] bg-cover bg-center"

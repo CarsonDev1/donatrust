@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import Header from '../../components/common/Header';
 import Footer from '../../components/common/Footer';
 import Button from '../../components/ui/Button';
 import campaignService from '../../services/campaignService';
@@ -133,7 +132,6 @@ const CampaignListPage = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-global-3 shadow-2xl">
-        <Header />
         <div className="flex-1 flex items-center justify-center py-20">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
         </div>
@@ -144,8 +142,6 @@ const CampaignListPage = () => {
 
   return (
     <div className="min-h-screen bg-global-3 shadow-2xl">
-      <Header />
-
       {/* Hero Section */}
       <div
         className="w-full h-[265px] relative bg-cover bg-center"

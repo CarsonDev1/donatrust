@@ -3,14 +3,191 @@ import Slider from '../../components/ui/Slider';
 import PagerIndicator from '../../components/ui/PagerIndicator';
 import Button from '../../components/ui/Button';
 import campaignService from '../../services/campaignService';
+import { useAuth } from '../../context/AuthContext';
+import api from '../../services/api';
+import { Pie, Bar } from 'react-chartjs-2';
+import {
+  Chart as ChartJS,
+  ArcElement,
+  Tooltip,
+  Legend,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title as ChartTitle
+} from 'chart.js';
+ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, ChartTitle);
+
+// Copy AdminDashboard component từ ProfileDashboard
+const AdminDashboard = ({ stats }) => {
+  const pieData = {
+    labels: ['Users', 'Charities', 'Campaigns', 'Donations', 'News', 'Donation Amount'],
+    datasets: [
+      {
+        data: [
+          stats.totalUsers,
+          stats.totalCharities,
+          stats.totalCampaigns,
+          stats.totalDonations,
+          stats.totalNews,
+          stats.totalDonationAmount,
+        ],
+        backgroundColor: [
+          '#3b82f6', // blue
+          '#22c55e', // green
+          '#facc15', // yellow
+          '#ec4899', // pink
+          '#6366f1', // indigo
+          '#f472b6', // rose
+        ],
+        borderWidth: 1,
+      },
+    ],
+  };
+  const barData = {
+    labels: ['Pending Charities', 'Pending Campaigns', 'Pending Approvals'],
+    datasets: [
+      {
+        label: 'Pending',
+        data: [
+          stats.pendingCharities,
+          stats.pendingCampaigns,
+          stats.pendingApprovals,
+        ],
+        backgroundColor: '#f59e42',
+        borderRadius: 6,
+      },
+    ],
+  };
+  const chartContainerClass = "rounded-2xl shadow-xl bg-gradient-to-br from-blue-50 via-white to-pink-50 p-8 flex flex-col items-center mb-10 border border-blue-100";
+  return (
+    <div className="w-full bg-white min-h-screen">
+      <div className="max-w-6xl mx-auto py-10 px-4">
+        <h1 className="text-3xl font-bold mb-8 text-blue-700">Admin Dashboard</h1>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-10">
+          <div className="bg-blue-50 rounded-lg p-6 shadow text-center">
+            <div className="text-2xl font-bold text-blue-700">{stats.totalUsers}</div>
+            <div className="text-gray-600 mt-1">Total Users</div>
+          </div>
+          <div className="bg-green-50 rounded-lg p-6 shadow text-center">
+            <div className="text-2xl font-bold text-green-700">{stats.totalCharities}</div>
+            <div className="text-gray-600 mt-1">Total Charities</div>
+          </div>
+          <div className="bg-yellow-50 rounded-lg p-6 shadow text-center">
+            <div className="text-2xl font-bold text-yellow-700">{stats.totalCampaigns}</div>
+            <div className="text-gray-600 mt-1">Total Campaigns</div>
+          </div>
+          <div className="bg-pink-50 rounded-lg p-6 shadow text-center">
+            <div className="text-2xl font-bold text-pink-700">{stats.totalNews}</div>
+            <div className="text-gray-600 mt-1">Total News</div>
+          </div>
+        </div>
+        <div className={chartContainerClass}>
+          <h2 className="text-xl font-extrabold mb-6 text-blue-700 tracking-tight uppercase drop-shadow">Overview Distribution</h2>
+          <div className="w-full max-w-xs">
+            <Pie data={pieData} options={{
+              plugins: {
+                legend: {
+                  position: 'bottom',
+                  labels: {
+                    font: { size: 15, family: 'inherit', weight: 'bold' },
+                    color: '#334155',
+                    padding: 18,
+                    boxWidth: 22,
+                    usePointStyle: true,
+                  },
+                  onHover: (e, legendItem, legend) => {
+                    e.native.target.style.cursor = 'pointer';
+                  }
+                },
+                tooltip: {
+                  callbacks: {
+                    label: function(context) {
+                      let label = context.label || '';
+                      if (label) label += ': ';
+                      label += context.parsed;
+                      return label;
+                    }
+                  }
+                }
+              }
+            }} />
+          </div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+          <div className="bg-orange-50 rounded-lg p-6 shadow text-center">
+            <div className="text-xl font-bold text-orange-700">{stats.pendingCharities}</div>
+            <div className="text-gray-600 mt-1">Pending Charities</div>
+          </div>
+          <div className="bg-red-50 rounded-lg p-6 shadow text-center">
+            <div className="text-xl font-bold text-red-700">{stats.pendingCampaigns}</div>
+            <div className="text-gray-600 mt-1">Pending Campaigns</div>
+          </div>
+          <div className="bg-purple-50 rounded-lg p-6 shadow text-center">
+            <div className="text-xl font-bold text-purple-700">{stats.pendingApprovals}</div>
+            <div className="text-gray-600 mt-1">Pending Approvals</div>
+          </div>
+        </div>
+        <div className={chartContainerClass}>
+          <h2 className="text-xl font-extrabold mb-6 text-blue-700 tracking-tight uppercase drop-shadow">Pending Overview</h2>
+          <div className="w-full max-w-2xl">
+            <Bar
+              data={barData}
+              options={{
+                responsive: true,
+                plugins: {
+                  legend: { display: false },
+                  title: { display: false },
+                  tooltip: {
+                    callbacks: {
+                      label: function(context) {
+                        return `${context.dataset.label}: ${context.parsed.y}`;
+                      }
+                    }
+                  }
+                },
+                scales: {
+                  x: {
+                    grid: { display: false },
+                    ticks: { font: { size: 15, family: 'inherit', weight: 'bold' }, color: '#334155' }
+                  },
+                  y: {
+                    beginAtZero: true,
+                    grid: { color: '#e0e7ef', borderDash: [4, 4] },
+                    ticks: { stepSize: 1, font: { size: 15, family: 'inherit', weight: 'bold' }, color: '#334155' }
+                  }
+                },
+                hover: { mode: 'nearest', intersect: true },
+                animation: { duration: 900, easing: 'easeOutQuart' },
+              }}
+            />
+          </div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="text-lg font-bold text-gray-700 mb-2">Total Donation Amount</div>
+            <div className="text-2xl font-bold text-green-700">{stats.totalDonationAmount?.toLocaleString() || 0} VND</div>
+          </div>
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="text-lg font-bold text-gray-700 mb-2">Total Donations</div>
+            <div className="text-2xl font-bold text-blue-700">{stats.totalDonations}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const Home = () => {
+  const { user } = useAuth();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [currentCampaignSlide, setCampaignSlide] = useState(0);
   const [campaigns, setCampaigns] = useState([]);
   const [categories, setCategories] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [adminStats, setAdminStats] = useState(null);
+  const [isAdminLoading, setIsAdminLoading] = useState(true);
 
   // Default categories fallback
   const defaultCategories = [
@@ -88,6 +265,16 @@ const Home = () => {
     fetchData();
   }, []);
 
+  useEffect(() => {
+    if (user?.role === 'admin') {
+      setIsAdminLoading(true);
+      api.get('/admin/dashboard/stats')
+        .then(res => setAdminStats(res.data))
+        .catch(() => setAdminStats(null))
+        .finally(() => setIsAdminLoading(false));
+    }
+  }, [user]);
+
   const handleSlideChange = (index) => {
     setCurrentSlide(index);
   };
@@ -131,6 +318,17 @@ const Home = () => {
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
       </div>
     );
+  }
+
+  if (user?.role === 'admin') {
+    if (isAdminLoading || !adminStats) {
+      return (
+        <div className="flex-1 flex items-center justify-center bg-white min-h-screen">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+        </div>
+      );
+    }
+    return <AdminDashboard stats={adminStats} />;
   }
 
   return (

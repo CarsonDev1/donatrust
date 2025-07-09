@@ -43,45 +43,47 @@ const Header = () => {
             <img src="/images/img_logo.png" alt="DonaTrust Logo" className="w-[125px] h-[39px]" />
           </Link>
 
-          {/* Center nav */}
-          <div className="flex flex-row items-center space-x-8">
-            {/* Search */}
-            <SearchView placeholder="Search campaign..." onSearch={handleSearch} />
+          {/* Center nav: Ẩn nếu là admin */}
+          {user?.role !== 'admin' && (
+            <div className="flex flex-row items-center space-x-8">
+              {/* Search */}
+              <SearchView placeholder="Search campaign..." onSearch={handleSearch} />
 
-            {/* Navigation */}
-            <nav className="flex flex-row items-center space-x-6">
-              <Link
-                to="/"
-                className="text-base font-medium font-inter text-global-4 hover:text-blue-600"
-              >
-                Home
-              </Link>
-              <Link
-                to="/campaigns"
-                className="text-base font-medium font-inter text-global-4 hover:text-blue-600"
-              >
-                Campaign
-              </Link>
-              <Link
-                to="/introduce"
-                className="text-base font-medium font-inter text-global-4 hover:text-blue-600"
-              >
-                Introduce
-              </Link>
-              <Link
-                to="/contact"
-                className="text-base font-medium font-inter text-global-4 hover:text-blue-600"
-              >
-                Contact
-              </Link>
-            </nav>
+              {/* Navigation */}
+              <nav className="flex flex-row items-center space-x-6">
+                <Link
+                  to="/"
+                  className="text-base font-medium font-inter text-global-4 hover:text-blue-600"
+                >
+                  Home
+                </Link>
+                <Link
+                  to="/campaigns"
+                  className="text-base font-medium font-inter text-global-4 hover:text-blue-600"
+                >
+                  Campaign
+                </Link>
+                <Link
+                  to="/introduce"
+                  className="text-base font-medium font-inter text-global-4 hover:text-blue-600"
+                >
+                  Introduce
+                </Link>
+                <Link
+                  to="/contact"
+                  className="text-base font-medium font-inter text-global-4 hover:text-blue-600"
+                >
+                  Contact
+                </Link>
+              </nav>
 
-            {/* Language */}
-            <div className="flex flex-row items-center">
-              <span className="text-xs font-medium font-roboto text-global-4">EN</span>
-              <img src="/images/img_expand.svg" alt="Language Dropdown" className="ml-1 w-4 h-4" />
+              {/* Language */}
+              <div className="flex flex-row items-center">
+                <span className="text-xs font-medium font-roboto text-global-4">EN</span>
+                <img src="/images/img_expand.svg" alt="Language Dropdown" className="ml-1 w-4 h-4" />
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Auth Section */}
           <div className="flex flex-row items-center space-x-3">

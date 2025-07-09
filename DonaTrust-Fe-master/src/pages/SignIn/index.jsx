@@ -4,6 +4,8 @@ import Button from '../../components/ui/Button';
 import EditText from '../../components/ui/EditText';
 import CheckBox from '../../components/ui/CheckBox';
 import { useAuth } from '../../context/AuthContext';
+import { GoogleLogin } from '@react-oauth/google';
+import api from '../../services/api';
 
 const SignInPage = () => {
   const navigate = useNavigate();
@@ -115,27 +117,21 @@ const SignInPage = () => {
     }
   };
 
-  const handleGoogleSignIn = async () => {
+  // Thay thế hàm handleGoogleSignIn bằng hàm xử lý credential từ Google
+  const handleGoogleSignIn = async (credentialResponse) => {
+    console.log('Google credentialResponse:', credentialResponse); // Log toàn bộ object trả về từ Google
+    console.log('Google credential:', credentialResponse.credential); // Log riêng credential
+    setIsLoading(true);
+    setErrors({});
     try {
-      setIsLoading(true);
-      setErrors({});
-
-      // Note: In a real implementation, you would use Google OAuth2 SDK
-      // This is a placeholder for Google OAuth integration
-      // You would typically get the Google token from Google's OAuth flow
-
-      // For now, show a message that Google OAuth needs to be implemented
-      alert(
-        'Google OAuth integration needs to be implemented. Please use email/password login for now.'
-      );
-
-      // Example of how it would work:
-      // const googleToken = await getGoogleToken(); // This would come from Google OAuth
-      // await googleLogin(googleToken);
-    } catch (error) {
-      setErrors({
-        general: error.message || 'Google sign in failed. Please try again.',
+      const res = await api.post('/auth/google', {
+        token: credentialResponse.credential,
       });
+      localStorage.setItem('accessToken', res.data.accessToken);
+      // TODO: Nếu có AuthContext, nên gọi hàm login context ở đây
+      navigate('/');
+    } catch (error) {
+      setErrors({ general: 'Google sign in failed. Please try again.' });
     } finally {
       setIsLoading(false);
     }
@@ -144,6 +140,8 @@ const SignInPage = () => {
   const handleCreateAccount = () => {
     navigate('/signup');
   };
+
+
 
   return (
     <div className="flex flex-row min-h-screen bg-global-3">
@@ -154,7 +152,7 @@ const SignInPage = () => {
           <img
             src="/images/img_top.png" // 👈 thay đúng tên file logo bạn dùng
             alt="DonaTrust Logo"
-            className="w-[120px] h-auto object-contain"
+            className="w-[380px] h-auto object-contain"
           />
         </div>
 
@@ -162,7 +160,7 @@ const SignInPage = () => {
         <div className="flex flex-col">
           {/* Header */}
           <div className="mb-[46px]">
-            <h1 className="text-[40px] font-inter font-bold leading-[49px] text-center text-global-9 mb-4">
+            <h1 className="text-[40px] font-inter font-bold leading-[49px]  text-global-9 mb-4">
               Sign in
             </h1>
             <p className="text-lg font-inter font-normal leading-[22px] text-global-13">
@@ -237,18 +235,19 @@ const SignInPage = () => {
             </div>
 
             {/* Google Sign In */}
-            <Button
-              type="button"
-              variant="google"
-              size="large"
-              onClick={handleGoogleSignIn}
-              className="w-[399px] shadow-sm"
-            >
-              <span className="text-lg font-semibold font-inter text-global-9">
-                Sign in with Google
-              </span>
-              <img src="/images/img_plus.svg" alt="Google" className="ml-4 w-6 h-6" />
-            </Button>
+            <div className="w-[399px]">
+              <GoogleLogin
+                onSuccess={handleGoogleSignIn}
+                onError={() => setErrors({ general: 'Google sign in failed. Please try again.' })}
+                width="100%"
+                size="large"
+                shape="pill"
+                text="signin_with"
+              />
+            </div>
+
+            {/* Google OAuth Redirect Button */}
+            
 
             {/* Create Account Link */}
             <div className="pt-6 text-center">
